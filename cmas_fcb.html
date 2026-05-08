@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard CMAS — Futbol Sala</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--blau:#004D98;--grana:#A50044;--blau-clar:#E8F0FB;--text:#1a1a2e;--text-sec:#6b7280;--bg:#f8f9fc;--card:#fff;--border:#e5e7eb;--radius:12px;--shadow:0 1px 4px rgba(0,0,0,.08)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;min-height:100vh}
+#app{max-width:680px;margin:0 auto;padding:16px}
+.brand{background:linear-gradient(135deg,#004D98 0%,#003a7a 60%,#A50044 140%);color:#fff;padding:20px 24px;border-radius:var(--radius);margin-bottom:16px;position:relative;overflow:hidden}
+.brand-stripe{position:absolute;top:0;right:0;bottom:0;width:4px;background:#FFED02}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.brand p{font-size:12px;opacity:.8;margin-top:4px}
+.brand-sub{font-size:11px;opacity:.6;margin-top:8px;border-top:1px solid rgba(255,255,255,.2);padding-top:8px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.tab{flex:none;padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--text-sec);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab.active{background:var(--blau);color:#fff;border-color:var(--blau)}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-accent{border-left:3px solid var(--blau)}
+.section-title{font-size:13px;font-weight:600;color:var(--blau);margin-bottom:10px;letter-spacing:-.2px}
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text-sec);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;transition:border .15s}
+.input:focus{outline:none;border-color:var(--blau)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.item-group-title{margin-bottom:12px;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#fff}
+.item-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 12px;background:#fafafa;border-radius:8px;border:1px solid var(--border)}
+.item-label{flex:1;font-size:12px;line-height:1.4}
+.item-code{font-size:10px;font-weight:700;color:var(--blau);margin-right:2px}
+.btn{padding:11px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;width:100%;transition:all .15s;margin-top:6px}
+.btn-primary{background:var(--blau);color:#fff}
+.btn-primary:hover{background:#003a7a}
+.btn-secondary{background:#fff;color:var(--text-sec);border:1.5px solid var(--border)}
+#res-zone{display:none}
+.result-main{display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--blau-clar);border-radius:10px;margin-bottom:12px}
+.result-score{font-size:36px;font-weight:800;color:var(--blau)}
+.result-score span{font-size:14px;font-weight:400;color:var(--text-sec)}
+.risk-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.risk-BAIX{background:#d1fae5;color:#065f46}
+.risk-MODERAT{background:#fef3c7;color:#92400e}
+.risk-ALT{background:#fee2e2;color:#991b1b}
+.kpi-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.kpi-row:last-child{border-bottom:none}
+.kpi-label{font-size:12px;color:var(--text-sec)}
+.kpi-val{font-size:13px;font-weight:600}
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px}
+.metric{background:var(--blau-clar);border-radius:10px;padding:12px;text-align:center}
+.metric-label{font-size:10px;color:var(--text-sec);margin-bottom:4px}
+.metric-value{font-size:20px;font-weight:700;color:var(--blau)}
+.metric-sub{font-size:10px;color:var(--text-sec)}
+.inter-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.inter-title{font-size:12px;font-weight:600;color:var(--blau);margin-bottom:4px}
+.inter-desc{font-size:12px;color:var(--text);line-height:1.5}
+.inter-ref{font-size:10px;color:var(--text-sec);margin-top:6px;font-style:italic}
+.progress{flex:1;background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden;margin:0 10px}
+.progress-bar{height:100%;border-radius:4px;transition:width .3s}
+.alert{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;margin-top:8px}
+.alert-info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+.alert-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.alert-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.alert-danger{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3}
+.rec-item{padding:10px 12px;border-left:3px solid var(--blau);background:#fafafa;border-radius:0 8px 8px 0;margin-bottom:8px}
+.rec-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.rec-text{font-size:12px;color:var(--text-sec);line-height:1.5}
+.empty-state{text-align:center;padding:30px 20px;color:var(--text-sec)}
+.empty-state-icon{font-size:32px;margin-bottom:10px;opacity:.4}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div class="brand">
+  <div class="brand-stripe"></div>
+  <h1>Dashboard CMAS · Futbol Sala</h1>
+  <p>Cutting Movement Assessment Score — Cribratge biomecànic del COD</p>
+  <div class="brand-sub">Eina de cribratge del canvi de direcció · Dos'Santos et al. (2021)</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="tab('aval')">📋 Avaluació</button>
+  <button class="tab" onclick="tab('perfil')">👤 Perfil</button>
+  <button class="tab" onclick="tab('inter')">🎯 Intervenció</button>
+  <button class="tab" onclick="tab('equip')">👥 Equip</button>
+  <button class="tab" onclick="tab('prot')">📖 Protocol</button>
+</div>
+
+<!-- AVALUACIÓ -->
+<div id="tab-aval">
+  <div class="card">
+    <div class="section-title">Dades del jugador</div>
+    <div class="grid-2">
+      <div class="field"><label>Nom</label><input class="input" id="nom" type="text" placeholder="Nom del jugador"></div>
+      <div class="field"><label>Data</label><input class="input" id="data" type="date"></div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Categoria</label>
+        <select class="input" id="cat">
+          <option value="">—</option>
+          <option>1r Equip</option><option>Filial</option><option>Juvenil</option><option>Cadet</option><option>Infantil</option>
+        </select>
+      </div>
+      <div class="field"><label>Posició</label>
+        <select class="input" id="pos">
+          <option value="">—</option>
+          <option>Porter</option><option>Tanca</option><option>Ala</option><option>Pivot</option>
+        </select>
+      </div>
+      <div class="field"><label>Lateralitat</label>
+        <select class="input" id="lat">
+          <option value="">—</option>
+          <option>Dretà</option><option>Esquerrà</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>T_APROX (s)</label><input class="input" id="tap" type="number" step="0.01" placeholder="ex: 1.95"></div>
+      <div class="field"><label>T_COD (s)</label><input class="input" id="tcod" type="number" step="0.01" placeholder="ex: 3.64"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="item-group-title" style="background:var(--blau)">📍 PFC — Penúltim Contacte del Peu</div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT1</span> Estratègia de frenada al PFC</div>
+      <select class="input" id="it1" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">Sí (0)</option><option value="1">No (1)</option>
+      </select>
+    </div>
+    <div class="item-group-title" style="background:var(--grana);margin-top:12px">🦵 FFC — Contacte Final del Peu</div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT2</span> Distància lateral planta del peu</div>
+      <select class="input" id="it2" style="width:120px" onchange="calc()">
+        <option value="">—</option><option value="0">Estreta (0)</option><option value="1">Moderada (1)</option><option value="2">Àmplia (2)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT3</span> Rotació interna del maluc al contacte inicial</div>
+      <select class="input" id="it3" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT4</span> Valg dinàmic de genoll al contacte inicial</div>
+      <select class="input" id="it4" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT5</span> Peu en posició no neutra al contacte</div>
+      <select class="input" id="it5" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT6</span> Posició del tronc en el pla frontal/transversal</div>
+      <select class="input" id="it6" style="width:120px" onchange="calc()">
+        <option value="">—</option><option value="0">Medial (0)</option><option value="1">Vertical (1)</option><option value="2">Lateral (2)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT7</span> Tronc dret o inclinat enrere (pla sagital)</div>
+      <select class="input" id="it7" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT8</span> Flexió de genoll ≤30° durant el contacte</div>
+      <select class="input" id="it8" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+    <div class="item-row">
+      <div class="item-label"><span class="item-code">IT9</span> Valg excessiu de genoll durant l'acceptació de pes</div>
+      <select class="input" id="it9" style="width:100px" onchange="calc()">
+        <option value="">—</option><option value="0">No (0)</option><option value="1">Sí (1)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="res-zone">
+    <div class="card">
+      <div class="section-title">Resultat CMAS</div>
+      <div class="result-main">
+        <div>
+          <div class="result-score" id="r-tot">0 <span>/ 11</span></div>
+          <div id="r-badge"></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--text-sec)">T_COD</div>
+          <div style="font-size:20px;font-weight:700" id="r-tcod">—</div>
+          <div style="font-size:10px;color:var(--text-sec)">segons</div>
+        </div>
+      </div>
+      <div id="r-alert"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="guardar()">💾 Guardar avaluació</button>
+  <button class="btn btn-secondary" style="margin-top:6px" onclick="reset()">🔄 Nova avaluació</button>
+</div>
+
+<!-- PERFIL -->
+<div id="tab-perfil" style="display:none">
+  <div id="perfil-content">
+    <div class="card"><div class="empty-state"><div class="empty-state-icon">👤</div><div style="font-size:13px">Completa la pestanya <strong>Avaluació</strong> per veure el perfil detallat del jugador.</div></div></div>
+  </div>
+</div>
+
+<!-- INTERVENCIÓ -->
+<div id="tab-inter" style="display:none">
+  <div id="inter-content">
+    <div class="card"><div class="empty-state"><div class="empty-state-icon">🎯</div><div style="font-size:13px">Completa la pestanya <strong>Avaluació</strong> per generar el pla d'intervenció personalitzat.</div></div></div>
+  </div>
+</div>
+
+<!-- EQUIP -->
+<div id="tab-equip" style="display:none">
+  <div class="card">
+    <div class="section-title">Resum de l'equip</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Jugadors avaluats</div><div class="metric-value" id="eq-n">0</div><div class="metric-sub">jugadors</div></div>
+      <div class="metric"><div class="metric-label">CMAS mitjà</div><div class="metric-value" id="eq-mean">—</div><div class="metric-sub">punts</div></div>
+      <div class="metric"><div class="metric-label">En risc mod/alt</div><div class="metric-value" id="eq-risc">—</div><div class="metric-sub">jugadors</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Distribució de risc</div>
+    <div id="eq-dist"><div class="alert alert-info">Introdueix jugadors a la pestanya <strong>Avaluació</strong> per generar la distribució de risc de l'equip.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Prevalença de risc per ítem</div>
+    <div style="font-size:11px;color:var(--text-sec);margin-bottom:10px">Percentatge d'intents amb puntuació de risc (>0) per ítem</div>
+    <div id="eq-prev"><div style="font-size:12px;color:var(--text-sec);text-align:center;padding:16px">Sense dades disponibles</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Jugadors per categoria de risc</div>
+    <div id="eq-llista"><div style="font-size:12px;color:var(--text-sec);text-align:center;padding:16px">Sense dades disponibles</div></div>
+  </div>
+  <button class="btn btn-secondary" style="margin-top:4px" onclick="if(confirm('Esborrar totes les avaluacions?'))clearAll()">🗑️ Esborrar tot</button>
+</div>
+
+<!-- PROTOCOL -->
+<div id="tab-prot" style="display:none">
+  <div class="card card-accent">
+    <div class="section-title">Aplicacions del sistema CMAS</div>
+    <div style="margin-top:10px">
+      <div class="rec-item"><div class="rec-title">1. Cribratge periòdic de plantilla</div><div class="rec-text">Avaluació de tots els jugadors a pretemporada i a meitat de temporada. Genera el perfil individual de risc i permet detectar mecàniques deficitàries de forma primerenca.</div></div>
+      <div class="rec-item"><div class="rec-title">2. Protocol de retorn a la competició</div><div class="rec-text">Test obligatori en la fase final de readaptació post-lesió (LCA, turmell, isquiotibials). Criteri d'alta: CMAS igual o inferior al valor pre-lesió i dins del rang BAIX-MODERAT.</div></div>
+      <div class="rec-item"><div class="rec-title">3. Monitorització individual longitudinal</div><div class="rec-text">Seguiment de l'evolució del perfil de risc al llarg de la temporada. Detecta empitjoraments per acumulació de càrrega o fatiga crònica.</div></div>
+      <div class="rec-item"><div class="rec-title">4. Avaluació d'intervencions neuromusculars</div><div class="rec-text">Mesura pre-post de programes d'entrenament específics per confirmar l'efectivitat de les intervencions sobre la mecànica del COD.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Protocol de presa de dades</div>
+    <div class="kpi-row"><div class="kpi-label">Superfície</div><div class="kpi-val">Pista de futbol sala · calçat específic</div></div>
+    <div class="kpi-row"><div class="kpi-label">Circuit</div><div class="kpi-val">5 m aproximació + gir 90° + 5 m sortida</div></div>
+    <div class="kpi-row"><div class="kpi-label">Estímul</div><div class="kpi-val">Llum reactiva durant l'aproximació</div></div>
+    <div class="kpi-row"><div class="kpi-label">Càmeres</div><div class="kpi-val">≥2 càmeres · alçada del maluc · ≥100 fps</div></div>
+    <div class="kpi-row"><div class="kpi-label">Posició càmeres</div><div class="kpi-val">Frontal (≥3 m) + sagital (≥5 m)</div></div>
+    <div class="kpi-row"><div class="kpi-label">Mesura temps</div><div class="kpi-val">Cèl·lules fotoelèctriques</div></div>
+    <div class="kpi-row"><div class="kpi-label">Anàlisi vídeo</div><div class="kpi-val">Kinovea (Bordeaux, França) · ~3 min/intent</div></div>
+    <div class="kpi-row"><div class="kpi-label">Repeticions</div><div class="kpi-val">2-3 intents vàlids per costat</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Interpretació del CMAS</div>
+    <div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-BAIX">BAIX (≤3)</span></div><div class="kpi-val" style="font-weight:400;font-size:12px">Mecànica òptima. Manteniment preventiu.</div></div>
+    <div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-MODERAT">MODERAT (4-6)</span></div><div class="kpi-val" style="font-weight:400;font-size:12px">Intervenció específica sobre els ítems amb risc.</div></div>
+    <div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-ALT">ALT (≥7)</span></div><div class="kpi-val" style="font-weight:400;font-size:12px">Prioritat màxima. Programa neuromuscular intensiu.</div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Fonament científic</div>
+    <div style="font-size:12px;line-height:1.7">
+      <p style="margin-bottom:8px">El CMAS és una eina validada de 9 ítems qualitatius per avaluar la qualitat del COD i estimar el risc de lesió del lligament encreuat anterior (LCA) sense contacte. Els ítems cobreixen les fases de frenada (PFC) i redirecció (FFC) en els plans sagital, frontal i transversal.</p>
+      <p style="margin-bottom:8px">La literatura evidencia un <em>conflicte rendiment-lesió</em>: les mecàniques que afavoreixen un COD ràpid poden incrementar les càrregues articulars sobre el genoll. L'objectiu del CMAS és identificar mecàniques de risc modificables mitjançant intervenció neuromuscular.</p>
+      <p style="font-size:11px;color:var(--text-sec);font-style:italic">Dos'Santos et al. (2021). The Cutting Movement Assessment Score (CMAS) qualitative screening tool. <em>Sports</em>, 9(8), 116.</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var refs={
+  it1:{titol:'Estratègia de frenada al PFC',desc:"Drills de desacceleració progressiva en 5 metres. Focus en allargar el penúltim contacte per absorbir momentum abans del tall. Exercicis: aproximació + frenada amb peu de PFC marcat, step-back decelerations, treball excèntric de quàdriceps.",ref:"Dos'Santos et al. (2019b)"},
+  it2:{titol:'Distància lateral planta peu',desc:"Correcció amb marcadors al terra per entrenar amplitud òptima del pas final. Treball pliomètric amb pistes externes per afavorir la producció de força medial. No ha de ser excessivament àmplia (augmenta KAM) ni estreta (redueix impuls lateral).",ref:"Dos'Santos et al. (2021)"},
+  it3:{titol:'Rotació interna del maluc',desc:'Enfortiment dels rotadors externs: clamshells, lateral band walks, hip airplanes. Complementar amb mobilitat del maluc en rotació externa i consciència postural durant el COD.',ref:'Sigward et al. (2015)'},
+  it4:{titol:'Valg dinàmic de genoll (contacte inicial)',desc:'Programa neuromuscular de control del valg: single-leg squat, Bulgarian split squat, Romanian deadlift unilateral amb focus en alineació peu-genoll-maluc. Feedback visual amb mirall o vídeo en temps real.',ref:"Dos'Santos et al. (2021)"},
+  it5:{titol:'Posició del peu no neutra',desc:'Treball de propioceptivitat i control motor del peu: exercicis a peu descalç sobre superfícies inestables, aterratges amb atenció a la posició del peu, shortfoot exercises.',ref:"Dos'Santos et al. (2019a)"},
+  it6:{titol:'Posició del tronc (frontal/transversal)',desc:'Enfortiment del core amb pertorbació multiplanar: planks dinàmics, pallof press, Russian twists. Focus en mantenir el tronc orientat cap a la nova direcció durant el gir.',ref:"Dos'Santos et al. (2021)"},
+  it7:{titol:'Tronc sagital durant el contacte',desc:'Treball de control del tronc en flexió lleugera cap endavant. Exercicis: medicine ball chops, anti-extension core work, posture drills sota fatiga.',ref:"Dos'Santos et al. (2019b)"},
+  it8:{titol:'Flexió de genoll ≤30°',desc:'Treball excèntric del quàdriceps: drop jumps amb focus en amortiment profund, squat excèntric tempo 4-0-1. Landing mechanics amb atenció a la flexió tripla (maluc-genoll-turmell).',ref:"Dos'Santos et al. (2021)"},
+  it9:{titol:'Valg excessiu durant acceptació de pes',desc:'Exercicis nòrdics isquiotibials, enfortiment abductor: side plank amb abducció, copenhagen adduction. Integració amb tasques de COD a velocitat progressiva.',ref:"Dos'Santos et al. (2021)"}
+};
+var itemLabels={it1:'IT1 · Frenada PFC',it2:'IT2 · Planta peu',it3:'IT3 · Maluc rotació',it4:'IT4 · Valg inicial',it5:'IT5 · Peu neutre',it6:'IT6 · Tronc frontal',it7:'IT7 · Tronc sagital',it8:'IT8 · Flexió genoll',it9:'IT9 · Valg WA'};
+var dbAval=[];
+var currentAval=null;
+
+function tab(t){
+  ['aval','perfil','inter','equip','prot'].forEach(function(x){document.getElementById('tab-'+x).style.display=x===t?'block':'none';});
+  document.querySelectorAll('.tab').forEach(function(b,i){b.classList.toggle('active',['aval','perfil','inter','equip','prot'][i]===t);});
+  if(t==='perfil')renderPerfil();
+  if(t==='inter')renderInter();
+  if(t==='equip')renderEquip();
+}
+function val(id){var v=document.getElementById(id).value;return v===''?null:parseInt(v);}
+function getAll(){return['it1','it2','it3','it4','it5','it6','it7','it8','it9'].map(val);}
+
+function calc(){
+  var v=getAll();var f=v.filter(function(x){return x!==null;});
+  if(f.length<9){document.getElementById('res-zone').style.display='none';return;}
+  var tot=v.reduce(function(a,b){return a+b;},0);
+  var cat=tot<=3?'BAIX':tot<=6?'MODERAT':'ALT';
+  document.getElementById('res-zone').style.display='block';
+  document.getElementById('r-tot').innerHTML=tot+' <span>/ 11</span>';
+  document.getElementById('r-badge').innerHTML='<span class="risk-badge risk-'+cat+'">'+(cat==='BAIX'?'BAIX ≤3':cat==='MODERAT'?'MODERAT 4-6':'ALT ≥7')+'</span>';
+  var tc=document.getElementById('tcod').value;
+  document.getElementById('r-tcod').textContent=tc?parseFloat(tc).toFixed(2)+'s':'—';
+  var al=document.getElementById('r-alert');
+  if(cat==='BAIX')al.innerHTML='<div class="alert alert-success"><strong>Mecànica òptima</strong> — Perfil de baix risc. Mantenir el treball preventiu habitual.</div>';
+  else if(cat==='MODERAT')al.innerHTML='<div class="alert alert-warn"><strong>Risc moderat</strong> — Revisar els ítems amb puntuació positiva i dissenyar un pla d\'intervenció específic.</div>';
+  else al.innerHTML='<div class="alert alert-danger"><strong>Risc elevat</strong> — Prioritat màxima d\'intervenció. Programa neuromuscular intensiu immediat.</div>';
+  currentAval={nom:document.getElementById('nom').value||'Jugador',cat:document.getElementById('cat').value,pos:document.getElementById('pos').value,lat:document.getElementById('lat').value,data:document.getElementById('data').value,tap:document.getElementById('tap').value,tcod:tc,items:v,total:tot,risc:cat};
+}
+
+function guardar(){
+  if(!currentAval){alert('Completa primer tots els ítems del CMAS.');return;}
+  dbAval.push(JSON.parse(JSON.stringify(currentAval)));
+  alert('✅ Avaluació de '+currentAval.nom+' guardada correctament.');
+}
+
+function reset(){
+  ['nom','data','tap','tcod'].forEach(function(i){document.getElementById(i).value='';});
+  ['cat','pos','lat','it1','it2','it3','it4','it5','it6','it7','it8','it9'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('res-zone').style.display='none';
+  currentAval=null;
+}
+
+function renderPerfil(){
+  var box=document.getElementById('perfil-content');
+  if(!currentAval){box.innerHTML='<div class="card"><div class="empty-state"><div class="empty-state-icon">👤</div><div style="font-size:13px">Completa la pestanya <strong>Avaluació</strong> per veure el perfil detallat del jugador.</div></div></div>';return;}
+  var a=currentAval;
+  var itemNames=['it1','it2','it3','it4','it5','it6','it7','it8','it9'];
+  var itemMaxs=[1,2,1,1,1,2,1,1,1];
+  var html='<div class="card"><div class="section-title">Perfil de '+a.nom+'</div>';
+  html+='<div class="kpi-row"><div class="kpi-label">Categoria</div><div class="kpi-val">'+(a.cat||'—')+'</div></div>';
+  html+='<div class="kpi-row"><div class="kpi-label">Posició</div><div class="kpi-val">'+(a.pos||'—')+'</div></div>';
+  html+='<div class="kpi-row"><div class="kpi-label">CMAS Total</div><div class="kpi-val">'+a.total+' / 11 &nbsp;<span class="risk-badge risk-'+a.risc+'">'+a.risc+'</span></div></div>';
+  if(a.tcod)html+='<div class="kpi-row"><div class="kpi-label">T_COD</div><div class="kpi-val">'+parseFloat(a.tcod).toFixed(2)+' s</div></div>';
+  html+='</div><div class="card"><div class="section-title">Puntuació per ítem</div>';
+  itemNames.forEach(function(id,i){
+    var v=a.items[i];var mx=itemMaxs[i];var pct=mx>0?(v/mx)*100:0;
+    var col=v===0?'#3B6D11':v===mx?'#A32D2D':'#BA7517';
+    html+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>'+itemLabels[id]+'</span><span style="font-weight:700;color:'+col+'">'+v+' / '+mx+'</span></div><div class="progress" style="margin:0"><div class="progress-bar" style="background:'+col+';width:'+pct+'%"></div></div></div>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
+}
+
+function renderInter(){
+  var box=document.getElementById('inter-content');
+  if(!currentAval){box.innerHTML='<div class="card"><div class="empty-state"><div class="empty-state-icon">🎯</div><div style="font-size:13px">Completa la pestanya <strong>Avaluació</strong> per generar el pla d\'intervenció personalitzat.</div></div></div>';return;}
+  var a=currentAval;
+  var itemNames=['it1','it2','it3','it4','it5','it6','it7','it8','it9'];
+  var riscos=[];
+  itemNames.forEach(function(id,i){if(a.items[i]>0)riscos.push(id);});
+  var html='';
+  if(riscos.length===0){
+    html='<div class="card"><div class="section-title">Pla d\'intervenció — '+a.nom+'</div><div class="alert alert-success"><strong>Mecànica òptima en tots els ítems.</strong> Mantenir el treball preventiu habitual: força excèntrica, core i exercicis neuromusculars. Reavaluació recomanada cada 12 setmanes.</div></div>';
+  } else {
+    html='<div class="card"><div class="section-title">Pla d\'intervenció — '+a.nom+'</div><div class="alert alert-info" style="margin-bottom:0">'+riscos.length+' ítem'+(riscos.length!==1?'s':'')+' amb puntuació de risc detectat'+(riscos.length!==1?'s':'')+'.</div></div>';
+    riscos.forEach(function(id){
+      var r=refs[id];
+      html+='<div class="inter-card"><div class="inter-title">'+itemLabels[id]+' — '+r.titol+'</div><div class="inter-desc">'+r.desc+'</div><div class="inter-ref">📚 '+r.ref+'</div></div>';
+    });
+  }
+  box.innerHTML=html;
+}
+
+function renderEquip(){
+  var n=dbAval.length;
+  document.getElementById('eq-n').textContent=n;
+  if(n===0){
+    document.getElementById('eq-mean').textContent='—';
+    document.getElementById('eq-risc').textContent='—';
+    document.getElementById('eq-dist').innerHTML='<div class="alert alert-info">Introdueix jugadors a la pestanya <strong>Avaluació</strong> per generar la distribució de risc de l\'equip.</div>';
+    document.getElementById('eq-prev').innerHTML='<div style="font-size:12px;color:var(--text-sec);text-align:center;padding:16px">Sense dades disponibles</div>';
+    document.getElementById('eq-llista').innerHTML='<div style="font-size:12px;color:var(--text-sec);text-align:center;padding:16px">Sense dades disponibles</div>';
+    return;
+  }
+  var totals=dbAval.map(function(a){return a.total;});
+  var mean=(totals.reduce(function(a,b){return a+b;},0)/n).toFixed(2);
+  var nRisc=dbAval.filter(function(a){return a.risc!=='BAIX';}).length;
+  document.getElementById('eq-mean').textContent=mean;
+  document.getElementById('eq-risc').textContent=nRisc;
+  var baix=dbAval.filter(function(a){return a.risc==='BAIX';}).length;
+  var mod=dbAval.filter(function(a){return a.risc==='MODERAT';}).length;
+  var alt=dbAval.filter(function(a){return a.risc==='ALT';}).length;
+  var pB=(baix/n*100).toFixed(1),pM=(mod/n*100).toFixed(1),pA=(alt/n*100).toFixed(1);
+  document.getElementById('eq-dist').innerHTML=
+    '<div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-BAIX">BAIX ≤3</span></div><div class="progress"><div class="progress-bar" style="background:#3B6D11;width:'+pB+'%"></div></div><div class="kpi-val">'+pB+'% ('+baix+')</div></div>'+
+    '<div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-MODERAT">MODERAT 4-6</span></div><div class="progress"><div class="progress-bar" style="background:#BA7517;width:'+pM+'%"></div></div><div class="kpi-val">'+pM+'% ('+mod+')</div></div>'+
+    '<div class="kpi-row"><div class="kpi-label"><span class="risk-badge risk-ALT">ALT ≥7</span></div><div class="progress"><div class="progress-bar" style="background:#A32D2D;width:'+pA+'%"></div></div><div class="kpi-val">'+pA+'% ('+alt+')</div></div>';
+  var itemNames=['it1','it2','it3','it4','it5','it6','it7','it8','it9'];
+  var prevHtml='';
+  itemNames.forEach(function(id,i){
+    var cnt=dbAval.filter(function(a){return a.items[i]>0;}).length;
+    var pct=(cnt/n*100).toFixed(1);
+    var col=cnt/n>=0.7?'#A32D2D':cnt/n>=0.3?'#BA7517':'#3B6D11';
+    prevHtml+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>'+itemLabels[id]+'</span><span style="font-weight:700;color:'+col+'">'+pct+'%</span></div><div class="progress" style="margin:0"><div class="progress-bar" style="background:'+col+';width:'+pct+'%"></div></div></div>';
+  });
+  document.getElementById('eq-prev').innerHTML=prevHtml;
+  var sorted=[].concat(dbAval).sort(function(a,b){return b.total-a.total;});
+  var listaHtml='';
+  sorted.forEach(function(a){listaHtml+='<div class="kpi-row"><div class="kpi-label">'+a.nom+(a.pos?' · '+a.pos:'')+'</div><div class="kpi-val">'+a.total+' &nbsp;<span class="risk-badge risk-'+a.risc+'">'+a.risc+'</span></div></div>';});
+  document.getElementById('eq-llista').innerHTML=listaHtml;
+}
+
+function clearAll(){dbAval=[];renderEquip();}
+</script>
+</body>
+</html>
